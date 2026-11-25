@@ -147,6 +147,13 @@ export function averageRating(ratings: number[]): number | null {
   return ratings.reduce((total, rating) => total + rating, 0) / ratings.length;
 }
 
+export function ratingSummary(ratings: number[]): { average: number | null; count: number } {
+  return {
+    average: averageRating(ratings),
+    count: ratings.length,
+  };
+}
+
 export function filterRecipes(
   recipes: Recipe[],
   cuisine: string,

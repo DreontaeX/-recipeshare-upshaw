@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { averageRating, type Recipe } from "@/lib/recipes";
+import { ratingSummary, type Recipe } from "@/lib/recipes";
 import RatingControl from "@/components/RatingControl";
 
 export default function RecipeDetail({ recipe }: { recipe: Recipe }) {
-  const average = averageRating(recipe.ratings)?.toFixed(1) ?? "No ratings yet";
+  const { average, count } = ratingSummary(recipe.ratings);
 
   return (
     <article className="detail-page">
@@ -20,7 +20,7 @@ export default function RecipeDetail({ recipe }: { recipe: Recipe }) {
           <p className="detail-byline">A recipe by <strong>{recipe.author}</strong></p>
           <div className="detail-stats">
             <span><strong>◷</strong> {recipe.prepTime} min</span>
-            <span><strong>★</strong> {average}{recipe.ratings.length > 0 && <small> ({recipe.ratings.length} ratings)</small>}</span>
+            <span><strong>★</strong> {average?.toFixed(1) ?? "No ratings yet"} <small>({count} {count === 1 ? "rating" : "ratings"})</small></span>
           </div>
         </div>
       </div>

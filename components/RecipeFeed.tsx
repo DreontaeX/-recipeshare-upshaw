@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { averageRating, CATEGORIES, CUISINES, type Recipe } from "@/lib/recipes";
+import { CATEGORIES, CUISINES, ratingSummary, type Recipe } from "@/lib/recipes";
 
 function Rating({ ratings }: { ratings: number[] }) {
-  const average = averageRating(ratings)?.toFixed(1) ?? "—";
+  const { average, count } = ratingSummary(ratings);
   return (
-    <span className="rating" aria-label={`Average rating: ${average} out of 5`}>
-      <span className="star" aria-hidden="true">★</span> {average}
-      <span className="rating-count">{ratings.length ? ` (${ratings.length})` : " (no ratings)"}</span>
+    <span className="rating" aria-label={`Average rating: ${average?.toFixed(1) ?? "not rated"} out of 5, ${count} ${count === 1 ? "rating" : "ratings"}`}>
+      <span className="star" aria-hidden="true">★</span> {average?.toFixed(1) ?? "—"}
+      <span className="rating-count"> ({count})</span>
     </span>
   );
 }

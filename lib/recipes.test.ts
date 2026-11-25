@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { averageRating, filterRecipes, SEED_RECIPES } from "./recipes";
+import { averageRating, filterRecipes, ratingSummary, SEED_RECIPES } from "./recipes";
 import { isValidRating } from "./ratings";
 import { validateRecipe, type RecipeFormValues } from "./validation";
 
@@ -54,6 +54,11 @@ describe("recipe validation", () => {
     it("calculates an average and returns no rating when there are no ratings", () => {
       expect(averageRating([5, 4, 3])).toBe(4);
       expect(averageRating([])).toBeNull();
+    });
+
+    it("returns the aggregate average and rating count for detail and card displays", () => {
+      expect(ratingSummary([5, 4, 3])).toEqual({ average: 4, count: 3 });
+      expect(ratingSummary([])).toEqual({ average: null, count: 0 });
     });
   });
 
