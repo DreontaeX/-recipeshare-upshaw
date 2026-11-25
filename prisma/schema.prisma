@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Recipe {
+  id          String   @id @default(cuid())
+  author      String
+  title       String
+  cuisine     String
+  category    String
+  ingredients String[]
+  steps       String[]
+  prepTime    Int
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  ratings     Rating[]
+
+  @@index([cuisine, category])
+  @@index([createdAt])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  recipeId  String
+  value     Int
+  createdAt DateTime @default(now())
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}

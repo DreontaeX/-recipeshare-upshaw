@@ -1,6 +1,6 @@
 # RecipeShare Implementation Plan
 
-This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€“M7. It assumes Next.js with the App Router, TypeScript, Supabase/PostgreSQL, and Vercel.
+This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€“M7. It assumes Next.js with the App Router, TypeScript, Prisma/PostgreSQL, and Vercel.
 
 ## 1. Initialize the application
 
@@ -9,20 +9,20 @@ This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€
 - **Work:**
   - Create the Next.js TypeScript app.
   - Configure scripts for `dev`, `test`, and `build`.
-  - Add placeholder environment-variable names only, such as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+  - Add the placeholder environment-variable name `DATABASE_URL` only.
 - **Test:** Add a basic app smoke test after the initial page renders.
 - **Check:** Run `npm install && npm run dev`, open `http://localhost:3000`, and confirm the app loads.
 
-## 2. Set up Supabase and the database schema
+## 2. Set up PostgreSQL and the database schema
 
 - **Features:** M6
-- **Files:** `supabase/schema.sql`, `lib/supabase/client.ts`, `lib/supabase/server.ts`, `.env.example`
+- **Files:** `prisma/schema.prisma`, `prisma/migrations/`, `prisma/seed.ts`, `lib/prisma.ts`, `.env.example`
 - **Work:**
-  - Create Supabase projects only on free-plan resources.
-  - Add `recipes` and `ratings` tables with fields needed by M1â€“M5.
+  - Configure a PostgreSQL database using the `DATABASE_URL` environment variable.
+  - Add Prisma `Recipe` and `Rating` models with fields needed by M1â€“M5.
   - Store the image URL, author name, cuisine, category, ingredients, steps, prep time, average/rating metadata, and creation time.
 - **Test:** Add a schema/integration test or a small database helper test when database access is first implemented.
-- **Check:** Confirm the tables appear in Supabase and read/write operations succeed from the app using environment variables.
+- **Check:** Confirm the tables exist in PostgreSQL and read/write operations succeed from the app using environment variables.
 
 ## 3. Deploy an early working skeleton
 
@@ -30,7 +30,7 @@ This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€
 - **Files:** `.github/workflows/ci.yml`, `README.md`, app layout/page files
 - **Work:**
   - Connect the GitHub repository to Vercel.
-  - Add Supabase environment variables to Vercel, never to Git.
+  - Add `DATABASE_URL` to Vercel, never to Git.
   - Deploy an initial page using the hosted database.
 - **Test:** Ensure the production build passes and the deployed app returns successfully.
 - **Check:** Open the Vercel URL, verify the page loads from the deployed environment, and redeploy once to confirm the setup is repeatable.
@@ -40,10 +40,10 @@ This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€
 - **Features:** M1
 - **Files:** `app/page.tsx`, `app/loading.tsx`, `components/RecipeCard.tsx`, `lib/recipes.ts`
 - **Work:**
-  - Read recipes from Supabase.
+  - Read recipes from PostgreSQL through Prisma.
   - Show photo, title, cuisine, category, and average rating for each card.
 - **Test:** Add a component or helper test that verifies every card field and average rating are rendered.
-- **Check:** Insert a recipe in Supabase and confirm it appears as a complete card on the home page.
+- **Check:** Insert a recipe in PostgreSQL and confirm it appears as a complete card on the home page.
 
 ## 5. Add recipe details
 
@@ -63,7 +63,7 @@ This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€
   - Build fields for author name, title, cuisine, category, ingredients, steps, prep time, and image URL.
   - Use dropdowns for cuisine and category.
   - Reject missing fields and show the exact missing-field feedback; save only valid recipes.
-- **Test:** Add tests for required-field validation and Supabase insert behavior.
+- **Test:** Add tests for required-field validation and Prisma insert behavior.
 - **Check:** Submit a complete recipe and confirm it appears on the home page. Submit once with each required field empty and confirm it is not saved.
 
 ## 7. Add cuisine and category filtering
@@ -91,9 +91,9 @@ This plan follows [docs/spec.md](spec.md) and builds only the Must features M1â€
 ## 9. Verify shared persistence
 
 - **Features:** M6
-- **Files:** Supabase schema and migration files, `lib/recipes.ts`, `lib/ratings.ts`
+- **Files:** Prisma schema and migration files, `lib/recipe-store.ts`, `lib/ratings.ts`
 - **Work:**
-  - Verify recipes and ratings are stored in Supabase rather than browser memory.
+  - Verify recipes and ratings are stored in PostgreSQL rather than browser memory.
   - Remove remaining mock or local-storage data paths.
 - **Test:** Add an integration test that creates a recipe/rating, reads it, and confirms it persists independently of the browser session.
 - **Check:** Add a recipe on one browser/computer, open the app in another browser, and confirm it is visible. Redeploy and confirm both data and ratings remain.

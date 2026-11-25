@@ -50,7 +50,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .hero-footnote { position: absolute; right: max(11.5vw, 54px); bottom: 28px; left: max(11.5vw, 54px); display: flex; justify-content: space-between; color: #92978d; font-size: 8px; font-weight: 600; letter-spacing: 1.25px; }
 
 .recipe-section { padding: 82px max(11.5vw, 54px) 105px; }
-.section-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 30px; }
+.section-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 30px; }
 .section-heading .eyebrow { margin-bottom: 12px; }
 .section-heading h2, .ingredients-panel h2, .steps-panel h2 { margin: 0; font-family: var(--serif); font-size: clamp(30px, 4vw, 42px); font-weight: 500; letter-spacing: -1.25px; }
 .heading-period { color: var(--orange); }
@@ -139,6 +139,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .instruction-number { color: var(--orange); font-family: var(--serif); font-size: 15px; }
 .steps-panel li p { margin: 0; color: #56645a; font-size: 12px; line-height: 1.8; }
 .detail-footer { display: flex; justify-content: space-between; margin-top: 53px; padding-top: 18px; border-top: 1px solid var(--line); color: #818a82; font-family: var(--serif); font-size: 13px; font-style: italic; }
+.rating-control { margin-top: 48px; padding: 27px 30px; border: 1px solid var(--line); background: #f9f8f3; }
+.rating-control .eyebrow { margin-bottom: 8px; }
+.rating-control h2 { margin: 0; font-family: var(--serif); font-size: 25px; font-weight: 500; }
+.rating-actions { display: flex; align-items: center; gap: 20px; margin-top: 16px; }
+.star-picker { display: flex; gap: 4px; }
+.star-choice { padding: 3px; border: 0; color: #c9c8bf; background: transparent; cursor: pointer; font-size: 24px; line-height: 1; }
+.star-choice:hover, .star-choice.selected { color: #c68c48; }
+.rating-message { margin: 13px 0 0; color: var(--green); font-size: 11px; }
 .detail-state { display: flex; min-height: 65vh; flex-direction: column; align-items: center; justify-content: center; padding: 45px; text-align: center; }
 .detail-state .notice { margin-bottom: 20px; }
 
@@ -195,5 +203,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .detail-image-wrap { height: 280px; }
   .detail-heading h1 { font-size: 43px; }
   .recipe-instructions { grid-template-columns: 1fr; gap: 44px; margin-top: 48px; padding-top: 34px; }
+  .rating-control { padding: 22px 18px; }
+  .rating-actions { align-items: flex-start; flex-direction: column; gap: 14px; }
   .detail-footer { gap: 15px; align-items: flex-start; font-size: 11px; }
 }

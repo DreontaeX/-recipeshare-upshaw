@@ -10,7 +10,7 @@ Build the Must features before the Should features. Keep the app deployable on V
 
 - Next.js with the App Router
 - TypeScript
-- Supabase for hosted PostgreSQL and future Google authentication
+- Prisma with PostgreSQL
 - Vercel for hosting and deployment
 
 Use a clean, mobile-friendly UI. Keep the implementation simple and avoid unnecessary dependencies.
@@ -55,7 +55,7 @@ Set up the following scripts in `package.json`:
 - Keep UI text clear and accessible.
 - Use the fixed cuisine and category lists defined in `docs/spec.md`; never allow free-text values for those fields.
 - Validate required fields in both the form flow and server-side database operations.
-- Use parameterized database APIs or the Supabase client; never construct SQL from unsanitized input.
+- Use Prisma for parameterized database operations; never construct SQL from unsanitized input.
 - Keep environment-variable names documented in `.env.example` without adding values.
 - Add or update tests for behavior when implementing a feature. Do not leave a feature working without test coverage.
 - Keep all code in this public repository and make small, frequent commits with clear messages.

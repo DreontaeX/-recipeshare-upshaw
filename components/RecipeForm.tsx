@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { CATEGORIES, CUISINES, saveRecipe, type Category, type Cuisine, type Recipe } from "@/lib/recipes";
+import { CATEGORIES, CUISINES } from "@/lib/recipes";
 import { validateRecipe, type RecipeErrors, type RecipeFormValues } from "@/lib/validation";
 
 const initialValues: RecipeFormValues = {
@@ -22,37 +22,40 @@ export default function RecipeForm() {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<RecipeErrors>({});
   const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function update(field: keyof RecipeFormValues, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validateRecipe(values);
     setErrors(nextErrors);
     setSubmitError("");
     if (Object.keys(nextErrors).length > 0) return;
 
-    const recipe: Recipe = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      author: values.author.trim(),
-      title: values.title.trim(),
-      cuisine: values.cuisine as Cuisine,
-      category: values.category as Category,
-      ingredients: values.ingredients.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
-      steps: values.steps.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
-      prepTime: Number(values.prepTime),
-      imageUrl: values.imageUrl.trim(),
-      ratings: [],
-    };
-
+    setIsSubmitting(true);
     try {
-      saveRecipe(recipe);
+      const response = await fetch("/api/recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const result = await response.json() as { errors?: RecipeErrors; error?: string; id?: string };
+      if (!response.ok) {
+        if (result.errors) setErrors(result.errors);
+        else setSubmitError(result.error ?? "Your recipe could not be saved. Please try again.");
+        return;
+      }
+      if (!result.id) throw new Error("The recipe was saved, but the server did not return its identifier.");
       router.push("/");
+      router.refresh();
     } catch {
-      setSubmitError("Your recipe could not be saved in this browser. Please check your browser storage settings and try again.");
+      setSubmitError("Your recipe could not be saved. Check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -130,7 +133,7 @@ export default function RecipeForm() {
         </div>
         <div className="form-actions">
           <p>Your recipe will be shared with the whole community.</p>
-          <button className="button" type="submit">Share recipe <span aria-hidden="true">↗</span></button>
+          <button className="button" type="submit" disabled={isSubmitting}>{isSubmitting ? "Saving…" : <>Share recipe <span aria-hidden="true">↗</span></>}</button>
         </div>
       </form>
     </section>

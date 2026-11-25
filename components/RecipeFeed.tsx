@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { averageRating, CATEGORIES, CUISINES, filterRecipes, loadRecipes, SEED_RECIPES, type Recipe } from "@/lib/recipes";
+import { useEffect, useRef, useState } from "react";
+import { averageRating, CATEGORIES, CUISINES, type Recipe } from "@/lib/recipes";
 
 function Rating({ ratings }: { ratings: number[] }) {
   const average = averageRating(ratings)?.toFixed(1) ?? "—";
@@ -14,24 +14,46 @@ function Rating({ ratings }: { ratings: number[] }) {
   );
 }
 
-export default function RecipeFeed() {
-  const [recipes, setRecipes] = useState<Recipe[]>(SEED_RECIPES);
+export default function RecipeFeed({ initialRecipes }: { initialRecipes: Recipe[] }) {
+  const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes);
   const [cuisine, setCuisine] = useState("");
   const [category, setCategory] = useState("");
-  const [storageError, setStorageError] = useState("");
+  const [requestError, setRequestError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const firstRender = useRef(true);
 
   useEffect(() => {
-    try {
-      setRecipes(loadRecipes());
-    } catch {
-      setStorageError("Your saved recipes could not be loaded from this browser.");
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
     }
-  }, []);
 
-  const visibleRecipes = useMemo(
-    () => filterRecipes(recipes, cuisine, category),
-    [recipes, cuisine, category],
-  );
+    const controller = new AbortController();
+    const search = new URLSearchParams();
+    if (cuisine) search.set("cuisine", cuisine);
+    if (category) search.set("category", category);
+
+    async function refreshRecipes() {
+      setIsLoading(true);
+      setRequestError("");
+      try {
+        const response = await fetch(`/api/recipes?${search.toString()}`, { signal: controller.signal });
+        if (!response.ok) throw new Error("Recipes could not be loaded. Please try again.");
+        const result: unknown = await response.json();
+        if (!Array.isArray(result)) throw new Error("The recipe service returned an invalid response.");
+        setRecipes(result as Recipe[]);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setRequestError(error instanceof Error ? error.message : "Recipes could not be loaded. Please try again.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    void refreshRecipes();
+    return () => controller.abort();
+  }, [cuisine, category]);
 
   return (
     <>
@@ -76,13 +98,13 @@ export default function RecipeFeed() {
             </select>
           </label>
           {(cuisine || category) && <button className="clear-filters" onClick={() => { setCuisine(""); setCategory(""); }}>Clear filters <span aria-hidden="true">×</span></button>}
-          <span className="results-count">{visibleRecipes.length} {visibleRecipes.length === 1 ? "recipe" : "recipes"}</span>
+          <span className="results-count">{isLoading ? "Loading…" : `${recipes.length} ${recipes.length === 1 ? "recipe" : "recipes"}`}</span>
         </div>
 
-        {storageError && <p className="notice" role="alert">{storageError}</p>}
-        {visibleRecipes.length > 0 ? (
+        {requestError && <p className="notice" role="alert">{requestError}</p>}
+        {recipes.length > 0 ? (
           <div className="recipe-grid">
-            {visibleRecipes.map((recipe, index) => {
+            {recipes.map((recipe, index) => {
               return (
                 <Link className="recipe-card" href={`/recipes/${recipe.id}`} key={recipe.id}>
                   <div className="card-image-wrap">
@@ -100,7 +122,9 @@ export default function RecipeFeed() {
               );
             })}
           </div>
-        ) : (
+        ) : isLoading ? (
+          <p className="empty-state" role="status">Loading recipes…</p>
+        ) : requestError ? null : (
           <div className="empty-state" role="status">
             <span className="empty-icon" aria-hidden="true">⌕</span>
             <h3>No recipes found</h3>

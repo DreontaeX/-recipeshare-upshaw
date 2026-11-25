@@ -1,40 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { averageRating, loadRecipes, SEED_RECIPES, type Recipe } from "@/lib/recipes";
+import { averageRating, type Recipe } from "@/lib/recipes";
+import RatingControl from "@/components/RatingControl";
 
-export default function RecipeDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [recipes, setRecipes] = useState<Recipe[]>(SEED_RECIPES);
-  const [loaded, setLoaded] = useState(false);
-  const [loadError, setLoadError] = useState("");
-
-  useEffect(() => {
-    try {
-      setRecipes(loadRecipes());
-    } catch {
-      setLoadError("Saved recipes could not be loaded from this browser.");
-    } finally {
-      setLoaded(true);
-    }
-  }, []);
-
-  const recipe = recipes.find((item) => item.id === id);
-  if (loadError) return <section className="detail-state"><p className="notice" role="alert">{loadError}</p><Link className="back-link" href="/">← Back to recipes</Link></section>;
-  if (!loaded) return <section className="detail-state" aria-live="polite">Loading recipe…</section>;
-  if (!recipe) {
-    return (
-      <section className="detail-state">
-        <span className="empty-icon" aria-hidden="true">⌕</span>
-        <h1>Recipe not found</h1>
-        <p>It may have moved, but there are plenty more to discover.</p>
-        <Link className="button" href="/">Explore recipes <span aria-hidden="true">↗</span></Link>
-      </section>
-    );
-  }
-
+export default function RecipeDetail({ recipe }: { recipe: Recipe }) {
   const average = averageRating(recipe.ratings)?.toFixed(1) ?? "No ratings yet";
 
   return (
@@ -68,6 +36,7 @@ export default function RecipeDetail() {
           <ol>{recipe.steps.map((step, index) => <li key={`${step}-${index}`}><span className="instruction-number">{String(index + 1).padStart(2, "0")}</span><p>{step}</p></li>)}</ol>
         </section>
       </div>
+      <RatingControl recipeId={recipe.id} />
       <div className="detail-footer"><span>Made with care by {recipe.author}.</span><Link className="text-button" href="/">Find another recipe <span aria-hidden="true">↗</span></Link></div>
     </article>
   );

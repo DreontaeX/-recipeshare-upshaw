@@ -1,5 +1,9 @@
 import RecipeFeed from "@/components/RecipeFeed";
+import { getRecipes } from "@/lib/recipe-store";
 
-export default function HomePage() {
-  return <RecipeFeed />;
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const recipes = await getRecipes();
+  return <RecipeFeed initialRecipes={recipes} />;
 }
